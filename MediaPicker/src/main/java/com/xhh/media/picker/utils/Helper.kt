@@ -1,6 +1,7 @@
 package com.xhh.media.picker.utils
 
 import android.graphics.Bitmap
+import android.net.Uri
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.databinding.BindingAdapter
 import com.bumptech.glide.Glide
@@ -18,4 +19,10 @@ internal fun AppCompatImageView.setThumbnail(bitmap: Bitmap){
 @BindingAdapter("image_selector")
 internal fun AppCompatImageView.setIconStatus(selected:Boolean){
     isSelected = selected
+}
+
+@BindingAdapter("image_uri")
+internal fun AppCompatImageView.setImageUri(uri: Uri){
+
+    Glide.with(this).load(uri).into(this)
 }

@@ -1,10 +1,10 @@
 package com.xhh.media.picker.image
 
+import android.app.ActivityOptions
 import android.app.Application
-import android.os.Bundle
+import android.content.Intent
 import android.util.Size
-import androidx.appcompat.app.AppCompatActivity
-import androidx.databinding.DataBindingUtil
+import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
@@ -17,42 +17,45 @@ import com.xhh.media.picker.data.Constants
 import com.xhh.media.picker.data.ImagePickerStatus
 import com.xhh.media.picker.data.MediaImage
 import com.xhh.media.picker.databinding.ActivityImagePickerBinding
+import com.xhh.media.picker.databinding.ActivityTemplateBinding
 import com.xhh.media.picker.databinding.ItemPickerBinding
 import com.xhh.media.picker.event.EventHelper
 import com.xhh.media.picker.image.adapter.MediaPickerAdapter
 import com.xhh.media.picker.image.listener.OnBottomViewClickListener
+import com.xhh.media.picker.ui.CoreActivity
 
 /**
  *  @Author  ： 小灰灰
  *  @Desc ：
  * @Time : 2021/5/8:8:41 AM
  **/
-internal class ImagePickerActivity : AppCompatActivity(),OnBottomViewClickListener {
-    private lateinit var mDataBinding: ActivityImagePickerBinding
+internal class ImagePickerActivity : CoreActivity<ActivityImagePickerBinding>(),OnBottomViewClickListener {
     private lateinit var mViewModel: MediaPickerViewModel
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override val layoutId: Int
+        get() = R.layout.activity_image_picker
+
+    override fun onCreated() {
         mViewModel = ViewModelProvider.AndroidViewModelFactory.getInstance(application).create(MediaPickerViewModel::class.java)
         mViewModel.mPickerStatus.maxCount = intent.getIntExtra(Constants.PICK_MAX_COUNT,4)
-        mDataBinding = DataBindingUtil.setContentView(this, R.layout.activity_image_picker)
-        mDataBinding.data = mViewModel.mPickerStatus
-        mDataBinding.listener = this
-        initToolbar(mDataBinding.toolbar)
-        initRv(mDataBinding.rv)
+    }
+    override fun onTemplateBindingCreated(dataBinding: ActivityTemplateBinding) {
+
 
     }
-    private fun initToolbar(toolbar: MaterialToolbar){
-        toolbar.setNavigationOnClickListener {
-            onBackPressed()
-        }
+
+    override fun onContentBindingCreated(dataBinding: ActivityImagePickerBinding) {
+        dataBinding.data = mViewModel.mPickerStatus
+        dataBinding.listener = this
+        initRv(dataBinding.rv)
     }
+
 
     private fun initRv(rv: RecyclerView) {
         rv.setHasFixedSize(true)
         rv.layoutManager = GridLayoutManager(this, 4, GridLayoutManager.VERTICAL, false)
         val screenWidth: Int = resources.displayMetrics.widthPixels / 4
         MediaPickerHelper.queryImage(this, Size(screenWidth, screenWidth), {
-            Snackbar.make(mDataBinding.root, "权限被拒，即将退出页面", Snackbar.LENGTH_SHORT).show()
+            Snackbar.make(mTemplateBinding.root, "权限被拒，即将退出页面", Snackbar.LENGTH_SHORT).show()
         }) {data->
             rv.adapter = MediaPickerAdapter(data,
                 onCreateItemView = {
@@ -64,7 +67,10 @@ internal class ImagePickerActivity : AppCompatActivity(),OnBottomViewClickListen
                     if (dataBinding is ItemPickerBinding){
                         dataBinding.callback = object :OnItemCallback{
                             override fun onItemClick(position: Int) {
-
+                               val options = ActivityOptionsCompat.makeSceneTransitionAnimation(this@ImagePickerActivity,dataBinding.root,"$position")
+                                startActivity(Intent(this@ImagePickerActivity,PreviewActivity::class.java).apply {
+                                    putExtra(Constants.PREVIEW_INDEX,position)
+                                },options.toBundle())
                             }
 
                             override fun onItemSelectStatusClick(position: Int) {
@@ -99,6 +105,8 @@ internal class ImagePickerActivity : AppCompatActivity(),OnBottomViewClickListen
 
 
     }
+
+
 
 
 }

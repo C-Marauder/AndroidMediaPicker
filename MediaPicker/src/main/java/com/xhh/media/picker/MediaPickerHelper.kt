@@ -39,8 +39,8 @@ object MediaPickerHelper:LifecycleObserver {
     private const val MEDIA_IMAGE_ID: String = MediaStore.Images.Media._ID
     private const val MEDIA_VIDEO_ID: String = MediaStore.Video.Media._ID
     private const val MEDIA_AUDIO_ID: String = MediaStore.Audio.Media._ID
-    private val mLiveDataMap:HashMap<LifecycleOwner,MutableLiveData<MutableList<MediaImage>>> by lazy {
-        hashMapOf()
+    internal val mImageCache:MutableList<MediaImage> by lazy {
+        mutableListOf()
     }
     private val mFormatterBuilder: StringBuilder by lazy {
         StringBuilder()
@@ -279,7 +279,7 @@ object MediaPickerHelper:LifecycleObserver {
     ) {
         val contentResolver = activity.applicationContext.contentResolver
         createQueryTask(activity,onQuery = {
-            val mediaImages = mutableListOf<MediaImage>()
+            mImageCache.clear()
             query(contentResolver, MEDIA_IMAGE_URI, MEDIA_IMAGE_ID, MEDIA_IMAGE_ID) { cursor ->
                 val id = cursor.getColumnIndexOrThrow(MEDIA_IMAGE_ID)
                 while (cursor.moveToNext()) {
@@ -300,12 +300,12 @@ object MediaPickerHelper:LifecycleObserver {
                         null
                     }
                     thumbnail?.let {
-                        mediaImages.add(MediaImage(contentUri, thumbnail))
+                        mImageCache.add(MediaImage(contentUri, thumbnail))
                     }
 
                 }
                 cursor.close()
-                it.postValue(mediaImages)
+                it.postValue(mImageCache)
             }
         },onResult)
 

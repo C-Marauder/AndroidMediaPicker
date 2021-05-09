@@ -5,5 +5,6 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <application>
         <activity android:name=".image.ImagePickerActivity" android:theme="@style/MediaStyle"/>
+        <activity android:name=".image.PreviewActivity" android:theme="@style/MediaStyle"/>
     </application>
 </manifest>

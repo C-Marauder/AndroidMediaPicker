@@ -20,6 +20,7 @@ internal interface Constants{
     companion object{
         const val PICK_MAX_COUNT:String = "pick_max_count"
         const val RESULT_MEDIA_IMAGE:String = "result_image"
+        const val PREVIEW_INDEX:String = "preview_index"
     }
 }
 
@@ -36,6 +37,7 @@ data class MediaImage(val originalUri: Uri, val thumbnail: Bitmap?):BaseObservab
         notifyPropertyChanged(BR.status)
     }
     @get:Bindable
+
     var selectedIndex:String?=null
     set(value) {
         field =value
