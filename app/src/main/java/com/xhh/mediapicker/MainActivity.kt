@@ -10,6 +10,9 @@ import com.xhh.media.picker.MediaPickerHelper
 import com.xhh.mediapicker.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
+    companion object{
+        private const val TAG:String = "MainActivity"
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val activityMainBinding = DataBindingUtil.setContentView<ActivityMainBinding>(this,R.layout.activity_main)
@@ -24,7 +27,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun startImagePage(){
-        MediaPickerHelper.startImagePicker(this)
+        MediaPickerHelper.startImagePicker(this){
+            Log.e(TAG,"${it.size}}")
+        }
     }
     fun startAudioPage(){
         startActivity(Intent(this,MediaActivity::class.java).apply {

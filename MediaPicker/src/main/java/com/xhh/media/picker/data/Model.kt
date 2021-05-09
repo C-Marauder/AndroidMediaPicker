@@ -2,10 +2,14 @@ package com.xhh.media.picker.data
 
 import android.graphics.Bitmap
 import android.net.Uri
-import android.provider.MediaStore
+import android.os.Parcelable
 import androidx.databinding.BaseObservable
 import androidx.databinding.Bindable
+import androidx.databinding.Observable
+import androidx.databinding.PropertyChangeRegistry
 import com.xhh.media.picker.BR
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 
 /**
  *  @Author  ： 小灰灰
@@ -15,10 +19,16 @@ import com.xhh.media.picker.BR
 internal interface Constants{
     companion object{
         const val PICK_MAX_COUNT:String = "pick_max_count"
+        const val RESULT_MEDIA_IMAGE:String = "result_image"
     }
 }
 
-data class MediaImage(val originalUri: Uri,val thumbnail: Bitmap?):BaseObservable(){
+/**
+ * @param originalUri 图片的原始地址
+ * @param thumbnail 图片的缩略图
+ */
+data class MediaImage(val originalUri: Uri, val thumbnail: Bitmap?):BaseObservable() {
+
     @get:Bindable
     var status:Boolean =false
     set(value) {
@@ -31,6 +41,7 @@ data class MediaImage(val originalUri: Uri,val thumbnail: Bitmap?):BaseObservabl
         field =value
         notifyPropertyChanged(BR.selectedIndex)
     }
+    @IgnoredOnParcel
     @get:Bindable
     var position:Int?=null
     set(value) {

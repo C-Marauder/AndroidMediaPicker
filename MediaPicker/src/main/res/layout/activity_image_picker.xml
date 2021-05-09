@@ -4,6 +4,9 @@
         <variable
             name="data"
             type="com.xhh.media.picker.data.ImagePickerStatus" />
+        <variable
+            name="listener"
+            type="com.xhh.media.picker.image.listener.OnBottomViewClickListener" />
     </data>
     <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -58,9 +61,10 @@
                 android:paddingStart="16dp"
                 android:paddingEnd="16dp"
                 android:text="预览"
+                android:onClick="@{()->listener.onPreviewClick()}"
                 android:enabled="@{data.pickerEnabled}"
                 android:textColor="@color/color_xhh_text_selector"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 app:layout_constraintStart_toStartOf="parent" />
 
             <com.google.android.material.textview.MaterialTextView
@@ -73,7 +77,8 @@
                 android:paddingEnd="8dp"
                 android:text="@{data.pickerCount}"
                 android:textColor="@color/color_xhh_text_selector"
-                android:textSize="16sp"
+                android:textSize="14sp"
+                android:onClick="@{()->listener.onCompleteClick()}"
                 android:enabled="@{data.pickerEnabled}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

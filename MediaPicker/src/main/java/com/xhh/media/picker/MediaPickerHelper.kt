@@ -14,12 +14,12 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.PermissionChecker
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.*
 import com.xhh.media.picker.data.Constants
 import com.xhh.media.picker.data.MediaAudio
 import com.xhh.media.picker.data.MediaImage
 import com.xhh.media.picker.data.MediaVideo
+import com.xhh.media.picker.event.EventHelper
 import com.xhh.media.picker.image.ImagePickerActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -32,13 +32,16 @@ import java.util.*
  *  @Desc ：
  * @Time : 2021/5/6:4:26 PM
  **/
-object MediaPickerHelper {
+object MediaPickerHelper:LifecycleObserver {
     private val MEDIA_IMAGE_URI: Uri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI
     private val MEDIA_VIDEO_URI: Uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI
     private val MEDIA_AUDIO_URI: Uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
     private const val MEDIA_IMAGE_ID: String = MediaStore.Images.Media._ID
     private const val MEDIA_VIDEO_ID: String = MediaStore.Video.Media._ID
     private const val MEDIA_AUDIO_ID: String = MediaStore.Audio.Media._ID
+    private val mLiveDataMap:HashMap<LifecycleOwner,MutableLiveData<MutableList<MediaImage>>> by lazy {
+        hashMapOf()
+    }
     private val mFormatterBuilder: StringBuilder by lazy {
         StringBuilder()
     }
@@ -282,21 +285,19 @@ object MediaPickerHelper {
                 while (cursor.moveToNext()) {
                     val imageId = cursor.getLong(id)
                     val contentUri = ContentUris.withAppendedId(MEDIA_IMAGE_URI, imageId)
-                    var thumbnail: Bitmap?
-                    try {
-                        thumbnail =
-                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
-                                contentResolver.loadThumbnail(contentUri, thumbnailSize, null)
-                            } else {
-                                MediaStore.Images.Thumbnails.getThumbnail(
-                                    contentResolver,
-                                    imageId,
-                                    MediaStore.Images.Thumbnails.MINI_KIND,
-                                    null
-                                )
-                            }
+                    val thumbnail: Bitmap? = try {
+                        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                            contentResolver.loadThumbnail(contentUri, thumbnailSize, null)
+                        } else {
+                            MediaStore.Images.Thumbnails.getThumbnail(
+                                contentResolver,
+                                imageId,
+                                MediaStore.Images.Thumbnails.MINI_KIND,
+                                null
+                            )
+                        }
                     } catch (e: IOException) {
-                        thumbnail = null
+                        null
                     }
                     thumbnail?.let {
                         mediaImages.add(MediaImage(contentUri, thumbnail))
@@ -337,13 +338,18 @@ object MediaPickerHelper {
             }
         }
     }
-
     /**
      * @param maxCount 最大选择数量，不传默认是4张
      */
-    fun startImagePicker(activity: FragmentActivity,maxCount:Int?=null){
+    fun startImagePicker(activity: FragmentActivity,maxCount:Int?=null,onResult: (mediaImages: MutableList<MediaImage>) -> Unit){
+        EventHelper.observeImage(activity,onResult)
         activity.startActivity(Intent(activity,ImagePickerActivity::class.java).apply {
-            putExtra(Constants.PICK_MAX_COUNT,maxCount)
+            putExtra(Constants.PICK_MAX_COUNT, maxCount)
         })
     }
+    fun startImagePicker(fragment: Fragment,maxCount:Int?=null,onResult: (mediaImages: MutableList<MediaImage>) -> Unit){
+        startImagePicker(fragment.requireActivity(),maxCount,onResult)
+    }
+
+
 }
